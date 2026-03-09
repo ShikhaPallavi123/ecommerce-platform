@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  product-service:
+    build: ./services/product-service
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - AWS_REGION=us-east-1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  order-service:
+    build: ./services/order-service
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - AWS_REGION=us-east-1
+      - PRODUCT_SERVICE_URL=http://product-service:3001
+    depends_on:
+      - product-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
